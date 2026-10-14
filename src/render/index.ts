@@ -1,6 +1,9 @@
 export * from './image-allowlist';
 export { isSafeHref, SafeLink } from './safe-link';
 export { ChatMarkdown, type ChatMarkdownProps, type Density } from './chat-markdown';
+export { MessageParts, type CardRegistry, type ToolMediaOptions } from './message-parts';
+export { PartView, PartBoundary, RENDERERS, type PartRenderer, type PartCtx } from './part-registry';
+export { UnsupportedPart } from './unsupported-part';
 export { ImagePart, type ImageAllowOpts } from './image-part';
 export { ChatTip, ChatTipContext, TipProvider, type TipComponent } from './chat-tip';
 export { ToolChip } from './tool-chip';
