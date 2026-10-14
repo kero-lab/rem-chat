@@ -19,6 +19,7 @@ import { cn } from '../lib/utils';
 
 export type Density = 'compact' | 'comfortable';
 type RenderLink = (props: { href: string; children: React.ReactNode }) => React.ReactNode;
+type RenderCitation = (p: { n: string; kind?: 'phrase'; source: SourceRef; children?: React.ReactNode }) => React.ReactNode;
 type PluginList = NonNullable<React.ComponentProps<typeof Streamdown>['remarkPlugins']>;
 
 export interface ChatMarkdownProps {
@@ -35,6 +36,8 @@ export interface ChatMarkdownProps {
   discordTokens?: boolean;
   /** Custom link renderer. Only ever called with an href that passed `isSafeHref`. */
   renderLink?: RenderLink;
+  /** Custom citation renderer. Only called when the source url passed `isSafeHref`. */
+  renderCitation?: RenderCitation;
   imageOpts?: ImageAllowOpts;
   className?: string;
 }
@@ -42,11 +45,16 @@ export interface ChatMarkdownProps {
 /** Ride on context: COMPONENTS must keep identity or streamdown re-renders every finished block (#2091). */
 const CitationContext = React.createContext<SourceRef[] | undefined>(undefined);
 const LinkContext = React.createContext<RenderLink | undefined>(undefined);
+const CitationRenderContext = React.createContext<RenderCitation | undefined>(undefined);
 const ImageOptsContext = React.createContext<ImageAllowOpts | undefined>(undefined);
 
 function Citation({ n, kind, children }: { n?: string; kind?: string; children?: React.ReactNode }) {
   const sources = React.useContext(CitationContext);
-  const source = n ? sourceAt(sources, Number(n)) : undefined;
+  const renderCitation = React.useContext(CitationRenderContext);
+  const found = n ? sourceAt(sources, Number(n)) : undefined;
+  // A source url is model/tool-supplied: never anchor or hand an unsafe one to the app.
+  const source = found && isSafeHref(found.url) ? found : undefined;
+  if (source && renderCitation) return <>{renderCitation({ n: n!, kind: kind === 'phrase' ? 'phrase' : undefined, source, children })}</>;
   if (kind === 'phrase') return source ? <CitationLink n={n!} source={source}>{children}</CitationLink> : <>[{children}][{n}]</>;
   return source ? <CitationMark n={n!} source={source} /> : <>{children}</>;
 }
@@ -103,6 +111,7 @@ export function ChatMarkdown({
   remarkPlugins: extraPlugins,
   discordTokens = false,
   renderLink,
+  renderCitation,
   imageOpts,
   className,
 }: ChatMarkdownProps) {
@@ -115,10 +124,11 @@ export function ChatMarkdown({
       remarkBreaks,
       remarkHtmlAsText,
       ...(discordTokens ? [remarkDiscordTokens] : []),
+      // App plugins (issue refs) first: chip-parens must see the links they make, so "(#2091)" unwraps.
+      ...(extraPlugins ?? []),
       remarkChipParens,
       [remarkCitations, { ns: citeKey ? citeKey.split(',').map(Number) : [] }] as const,
       [remarkEmoji, { seed }] as const,
-      ...(extraPlugins ?? []),
     ],
     [seed, citeKey, discordTokens, extraPlugins],
   );
@@ -127,6 +137,7 @@ export function ChatMarkdown({
   const stableImageOpts = React.useMemo(() => imageOpts, [imageKey]);
   return (
     <LinkContext.Provider value={renderLink}>
+      <CitationRenderContext.Provider value={renderCitation}>
       <ImageOptsContext.Provider value={stableImageOpts}>
         <CitationContext.Provider value={sources}>
           <div className={cn('chat-markdown min-w-0 break-words', density === 'compact' ? 'text-xs leading-snug' : 'text-sm leading-relaxed [&_pre_code]:text-[13px] [&_:not(pre)>code]:text-[13px]', className)}>
@@ -147,6 +158,7 @@ export function ChatMarkdown({
           </div>
         </CitationContext.Provider>
       </ImageOptsContext.Provider>
+      </CitationRenderContext.Provider>
     </LinkContext.Provider>
   );
 }

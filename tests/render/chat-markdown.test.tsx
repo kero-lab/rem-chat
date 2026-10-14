@@ -123,4 +123,38 @@ describe('ChatMarkdown links and options', () => {
     const { container } = render(<ChatMarkdown text="Fact [1]." sources={[{ n: 1, title: 'T', url: 'https://s.example/' }]} />);
     await waitFor(() => expect(container.querySelector('a[data-citation="1"]')).not.toBeNull());
   });
+  it('renderCitation receives the source; never called for an unsafe source url', async () => {
+    const calls: Array<{ n: string; url: string; kind?: string }> = [];
+    const renderCitation = ({ n, source, kind }: { n: string; source: { url: string }; kind?: string }) => { calls.push({ n, url: source.url, kind }); return <b data-mine={n}>m</b>; };
+    const { container } = render(
+      <ChatMarkdown text="A [1] and B [2] and [phrase][1]" renderCitation={renderCitation as never}
+        sources={[{ n: 1, title: 'T', url: 'https://s.example/' }, { n: 2, title: 'Bad', url: 'javascript:alert(1)' }]} />,
+    );
+    await waitFor(() => expect(container.querySelector('[data-mine="1"]')).not.toBeNull());
+    expect(calls.map((c) => c.url)).not.toContain('javascript:alert(1)');
+    expect(calls).toContainEqual({ n: '1', url: 'https://s.example/', kind: undefined });
+    expect(calls).toContainEqual({ n: '1', url: 'https://s.example/', kind: 'phrase' });
+    expect(container.querySelector('[data-mine="2"]')).toBeNull();
+    expect(container.querySelector('a[href^="javascript"]')).toBeNull();
+  });
+  it('default citations refuse an unsafe source url', async () => {
+    const { container } = render(<ChatMarkdown text="B [2]" sources={[{ n: 2, title: 'Bad', url: 'javascript:alert(1)' }]} />);
+    await waitFor(() => expect(container.textContent).toContain('B'));
+    expect(container.querySelector('a[data-citation]')).toBeNull();
+  });
+  it('app plugins run before chip-parens: "(#1)" loses its brackets', async () => {
+    const issueRefs = () => (tree: any) => {
+      const p = tree.children[0];
+      p.children = p.children.flatMap((n: any) => {
+        if (n.type !== 'text') return [n];
+        const [a, b] = n.value.split('#1');
+        if (b === undefined) return [n];
+        return [{ type: 'text', value: a }, { type: 'link', url: 'https://i.example/1', children: [{ type: 'text', value: '#1' }] }, { type: 'text', value: b }];
+      });
+    };
+    const { container } = render(<ChatMarkdown text="fixed (#1) today" remarkPlugins={[issueRefs] as never} />);
+    await waitFor(() => expect(container.querySelector('a[href="https://i.example/1"]')).not.toBeNull());
+    expect(container.textContent).not.toContain('(');
+    expect(container.textContent).toContain('fixed');
+  });
 });

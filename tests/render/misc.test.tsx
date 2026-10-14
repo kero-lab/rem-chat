@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { ChatTip } from '../../src/render/chat-tip';
+import { ChatTip, ChatTipContext } from '../../src/render/chat-tip';
 import { ToolChip } from '../../src/render/tool-chip';
 import { ToolCallDetails } from '../../src/render/tool-call-details';
 import type { ToolPart } from '../../src/protocol/parts';
@@ -8,8 +8,19 @@ import type { ToolPart } from '../../src/protocol/parts';
 describe('ChatTip', () => {
   it('labels its child with a tooltip', () => {
     render(<ChatTip label="Send" shortcut="Enter"><button>go</button></ChatTip>);
-    expect(screen.getByRole('tooltip').textContent).toContain('Send');
-    expect(screen.getByRole('button', { name: 'go' })).toBeInTheDocument();
+    const tip = screen.getByRole('tooltip', { hidden: true });
+    expect(tip.textContent).toContain('Send');
+    expect(screen.getByRole('button', { name: 'go' }).getAttribute('aria-describedby')).toBe(tip.id);
+  });
+  it('adds no wrapper box around the child', () => {
+    const { container } = render(<div id="row"><ChatTip label="Send"><button>go</button></ChatTip></div>);
+    expect(container.querySelector('#row > button')).not.toBeNull();
+  });
+  it('uses a provided tip component instead of the CSS bubble', () => {
+    const Mine = ({ label, children }: { label: React.ReactNode; children: React.ReactElement }) => <span data-testid="mine" data-label={String(label)}>{children}</span>;
+    render(<ChatTipContext.Provider value={Mine}><ChatTip label="Send"><button>go</button></ChatTip></ChatTipContext.Provider>);
+    expect(screen.getByTestId('mine').getAttribute('data-label')).toBe('Send');
+    expect(screen.queryByRole('tooltip', { hidden: true })).toBeNull();
   });
 });
 

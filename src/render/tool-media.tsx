@@ -13,6 +13,10 @@ export function isImageTool(name: string): boolean {
   return IMAGE_TOOLS.has(name);
 }
 
+function DefaultNavLink({ href, className, children }: { href: string; className: string; children: React.ReactNode }) {
+  return <a href={href} className={className}>{children}</a>;
+}
+
 const DEFAULT_RATIO = 4 / 3;
 /** The tile never exceeds 320 px on either side. */
 const TILE_MAX = 320;
@@ -38,6 +42,7 @@ export function ToolMedia({
   imageOpts,
   renderGenerating,
   openHref,
+  renderNavLink,
 }: {
   part: ToolPart;
   imageOpts?: ImageAllowOpts;
@@ -45,6 +50,8 @@ export function ToolMedia({
   renderGenerating?: (state: { startedAt?: number; still: boolean; label?: React.ReactNode }) => React.ReactNode;
   /** Where "still rendering" points (a gallery). No link when absent. */
   openHref?: string;
+  /** Renders the gallery link (e.g. next/link). A plain <a> when absent. */
+  renderNavLink?: (p: { href: string; className: string; children: React.ReactNode }) => React.ReactNode;
 }) {
   const image = isImageTool(toolNameOf(part));
   const media = part.media?.[0];
@@ -80,9 +87,7 @@ export function ToolMedia({
       {openHref ? (
         <>
           Still rendering — it&apos;ll be in the{' '}
-          <a href={openHref} className="text-rem underline-offset-2 hover:underline">
-            gallery
-          </a>
+          {(renderNavLink ?? DefaultNavLink)({ href: openHref, className: 'text-rem underline-offset-2 hover:underline', children: 'gallery' })}
         </>
       ) : (
         'Still rendering'
@@ -104,7 +109,7 @@ export function ToolMedia({
             renderGenerating({ startedAt: part.startedAt, still: failed || (!running && !(media && sawRunning)), label })
           ) : (
             <div className="relative h-full w-full">
-              <div className="aspect-square w-48 animate-pulse rounded-md bg-muted" />
+              <div className="h-full w-full animate-pulse bg-muted" />
               {label && <div className="absolute inset-0 flex items-center justify-center p-2 text-center text-xs text-muted-foreground">{label}</div>}
             </div>
           )}

@@ -2,7 +2,7 @@ export * from './image-allowlist';
 export { isSafeHref, SafeLink } from './safe-link';
 export { ChatMarkdown, type ChatMarkdownProps, type Density } from './chat-markdown';
 export { ImagePart, type ImageAllowOpts } from './image-part';
-export { ChatTip } from './chat-tip';
+export { ChatTip, ChatTipContext, TipProvider, type TipComponent } from './chat-tip';
 export { ToolChip } from './tool-chip';
 export { ToolCallDetails } from './tool-call-details';
 export { ToolMedia, isImageTool } from './tool-media';

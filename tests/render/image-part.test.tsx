@@ -134,4 +134,8 @@ describe('ImagePart (#2091)', () => {
     fireEvent.click(content);
     expect(screen.queryByRole('dialog')).toBeNull();
   });
+  it('imageOpts.origin allows the app origin', () => {
+    const { container } = render(<ImagePart src="https://hub.example/a.png" alt="a" imageOpts={{ origin: 'https://hub.example' }} />);
+    expect(container.querySelector('img')).not.toBeNull();
+  });
 });

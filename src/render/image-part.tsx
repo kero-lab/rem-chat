@@ -5,7 +5,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { ImageOff, X } from 'lucide-react';
 import { isAllowedChatImage } from './image-allowlist';
 
-export type ImageAllowOpts = { extraHosts?: string[]; extraSuffixes?: string[] };
+export type ImageAllowOpts = { extraHosts?: string[]; extraSuffixes?: string[]; /** The app's own origin. */ origin?: string };
 
 function hostOf(src: string): string | null {
   try {

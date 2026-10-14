@@ -27,6 +27,16 @@ describe('ToolMedia (#2091)', () => {
     expect(render(<ToolMedia part={done} />).container.querySelector('a')).toBeNull();
     expect(render(<ToolMedia part={done} openHref="/studio/image" />).container.querySelector('a')?.getAttribute('href')).toBe('/studio/image');
   });
+  it('routes the gallery link through renderNavLink', () => {
+    const done = { ...running, state: 'output-available' } as ToolPart;
+    const { getByTestId } = render(<ToolMedia part={done} openHref="/studio/image" renderNavLink={({ href, children }) => <i data-testid="nav" data-href={href}>{children}</i>} />);
+    expect(getByTestId('nav').getAttribute('data-href')).toBe('/studio/image');
+  });
+  it('the default placeholder fills its tile', () => {
+    const { container } = render(<ToolMedia part={running} />);
+    expect(container.querySelector('.animate-pulse')!.className).toContain('h-full');
+    expect(container.querySelector('.animate-pulse')!.className).not.toContain('w-48');
+  });
   it('honours imageOpts for auto-loading', () => {
     const done = { ...running, state: 'output-available', media: [{ type: 'file', url: 'https://img.example/a.png', mediaType: 'image/png', name: 'x' }] } as ToolPart;
     expect(render(<ToolMedia part={done} />).container.querySelector('img')).toBeNull();

@@ -51,3 +51,8 @@ if (typeof window !== 'undefined' && typeof Element !== 'undefined') {
   const stubs: Record<string, () => unknown> = { setPointerCapture() {}, releasePointerCapture() {}, hasPointerCapture() { return false; } };
   for (const [name, fn] of Object.entries(stubs)) if (typeof proto[name] !== 'function') Object.defineProperty(proto, name, { configurable: true, writable: true, value: fn });
 }
+
+// jsdom has no Element.scrollTo (streamdown calls it from an animation frame).
+if (typeof Element !== 'undefined' && typeof Element.prototype.scrollTo !== 'function') {
+  Element.prototype.scrollTo = function scrollTo() {};
+}
