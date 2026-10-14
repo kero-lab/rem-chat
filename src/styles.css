@@ -1,0 +1,26 @@
+/* @kero-lab/rem-chat: import after tailwindcss; tokens --rem/--rem-soft/--rem-faint are app-defined. */
+
+@keyframes rem-ring-sweep {
+  to { transform: rotate(360deg); }
+}
+
+/* "thinking" label (#2091 R2): a bright band sweeps across the text, Codex-style. */
+.rem-thinking-shimmer {
+  background: linear-gradient(90deg, var(--muted-foreground) 0%, var(--muted-foreground) 40%, var(--rem) 50%, var(--muted-foreground) 60%, var(--muted-foreground) 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: rem-thinking-sweep 1.6s linear infinite;
+}
+@keyframes rem-thinking-sweep {
+  from { background-position: 100% 0; }
+  to { background-position: -150% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rem-thinking-shimmer { animation: none; color: var(--muted-foreground); background: none; }
+}
+/* Forced colors drops the gradient, and transparent text would vanish. */
+@media (forced-colors: active) {
+  .rem-thinking-shimmer { color: CanvasText; background: none; }
+}
