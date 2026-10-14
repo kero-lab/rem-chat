@@ -1,6 +1,6 @@
 {
   "name": "@kero-lab/rem-chat",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Rem chat engine + display pieces shared by RemHub and KeroHub",
   "license": "MIT",
   "type": "module",

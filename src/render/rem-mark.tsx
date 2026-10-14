@@ -36,8 +36,8 @@ export function RemMark({ state, icon, size = 28, className }: { state: RemMarkS
         data-slot="rem-mark-ring"
         aria-hidden
         className={cn(
-          'absolute inset-0 rounded-full border-2',
-          state === 'error' ? 'border-destructive' : 'border-rem',
+          // The ring stays Rem blue on error: blue is her identity, and the error belongs to the alert row (rem-chat#1).
+          'absolute inset-0 rounded-full border-2 border-rem',
           state === 'thinking' &&
             'border-rem-soft border-t-rem motion-safe:animate-[rem-ring-sweep_1.6s_linear_infinite]',
         )}

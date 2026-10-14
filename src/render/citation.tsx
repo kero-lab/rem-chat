@@ -5,7 +5,10 @@ import type { SourceRef } from '../protocol/parts';
 
 const REL = 'noopener noreferrer nofollow';
 
-/** A bare "[n]" web citation (#2091 §11.1): a Rem-blue superscript number. No hover preview here; that lives in the app. */
+/**
+ * A bare "[n]" web citation (#2091 §11.1): a Rem-blue superscript number. No hover preview here; that lives in the app.
+ * The hit area is padded to about 30 px around the digit (rem-chat#1). A full-size touch route is the app's Sources row.
+ */
 export function CitationMark({ n, source }: { n: string; source: SourceRef }) {
   return (
     <sup className="mx-px text-[0.68em] leading-none">
@@ -15,7 +18,7 @@ export function CitationMark({ n, source }: { n: string; source: SourceRef }) {
         rel={REL}
         data-citation={n}
         aria-label={`Source ${n}: ${source.title}`}
-        className="relative rounded-sm font-semibold tabular-nums text-rem no-underline before:absolute before:-inset-x-1.5 before:-inset-y-1.5 before:content-[''] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rem/60"
+        className="relative rounded-sm font-semibold tabular-nums text-rem no-underline before:absolute before:-inset-x-2.5 before:-inset-y-2.5 before:content-[''] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rem/60"
       >
         {n}
       </a>

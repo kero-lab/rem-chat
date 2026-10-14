@@ -32,7 +32,7 @@ const nextConfig = { transpilePackages: ['@kero-lab/rem-chat'] };
 @source "../../node_modules/@kero-lab/rem-chat/src/**/*.{ts,tsx}";
 ```
 
-Adjust the `@source` path to the CSS file's location. The app must define the tokens `--rem`, `--rem-soft` and `--rem-faint`, and map them in Tailwind's theme as `--color-rem`, `--color-rem-soft` and `--color-rem-faint`:
+Adjust the `@source` path to the CSS file's location. The components also use the shadcn theme tokens `border`, `muted`, `muted-foreground`, `foreground`, `popover`, `popover-foreground`, `ring` and `destructive` (as Tailwind colours, e.g. `bg-muted`, `border-border`), so the app must define those too. The app must also define the tokens `--rem`, `--rem-soft` and `--rem-faint`, and map them in Tailwind's theme as `--color-rem`, `--color-rem-soft` and `--color-rem-faint`:
 
 ```css
 :root { --rem: #3f7ab1; --rem-soft: /* app value */; --rem-faint: /* app value */; }
@@ -90,11 +90,11 @@ Everything app-specific is injected; the defaults render plain, safe output.
 
 | Point | Where | Purpose |
 |-------|-------|---------|
-| `renderLink` | `MessageParts` `markdown` prop (`ChatMarkdown`) | Custom link renderer. Only called with an href that passed `isSafeHref` (`http:`, `https:`, `mailto:`, relative). |
+| `renderLink` | `MessageParts` `markdown` prop (`ChatMarkdown`) | Custom link renderer. Only called with an href that passed `isSafeHref` (`http:`, `https:`, `mailto:`, relative). It is a **render function, called inline** (`renderLink({ href, children })`), not mounted as a component, so it must not call hooks; return an element (your own component can use hooks). |
 | `renderCitation` | `markdown` prop | Custom `[n]` citation renderer. Only called when the source url is safe. |
-| `TipProvider` | context provider | Supplies the app's tooltip component (`TipComponent`); the default is a minimal tip. |
+| `TipProvider` | context provider | Supplies the app's tooltip component (`TipComponent`); the default is a minimal CSS tip. `label` is a `ReactNode` (the tool chip passes styled prose), and the provided component must keep a stable identity (module scope), or every tooltip remounts on each render. |
 | `renderNavLink` | `toolMedia` prop | Renders in-app navigation links in tool media (e.g. the app's router `Link`). |
-| `renderGenerating` | `toolMedia` prop | Placeholder shown while an image tool is generating. |
+| `renderGenerating` | `toolMedia` prop | Placeholder shown while an image tool is generating: `(state: { startedAt?: number; still: boolean; label?: ReactNode }) => ReactNode`. `startedAt` is the epoch ms the call began, `still` is true once there is nothing left to wait for (the call failed, or ended without media), so draw a static frame. The default is `ImageGenPlaceholder`. |
 | `imageOpts` | `markdown` and `toolMedia` props | Image auto-load policy: `extraHosts`, `extraSuffixes` (leading dot, e.g. `.rem.home`), `origin`. Defaults auto-load `cdn.discordapp.com`, `media.discordapp.net`, `cdn.kero-ara.com` and same-origin; every other host is click-to-load. `toolMedia` inherits the markdown policy unless set. |
 | `cards` | `MessageParts` prop | `CardRegistry`: card kind to the app's component. A kind with no entry renders nothing (its chip still shows). |
 | `renderers` | `MessageParts` prop | Replaces the default renderer for an exact part type (`text`, `file`, or a `data-*` type). |
