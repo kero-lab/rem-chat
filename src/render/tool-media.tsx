@@ -5,6 +5,7 @@ import { toolNameOf, type ToolPart } from '../protocol/parts';
 import { isAllowedChatImage } from './image-allowlist';
 import { useReducedMotion } from 'motion/react';
 import { ImagePart } from './image-part';
+import { ImageGenPlaceholder } from './image-gen-placeholder';
 import type { ImageAllowOpts } from './image-part';
 
 /** Tools whose call should hold a placeholder tile while they run. Add names as image tools appear. */
@@ -15,6 +16,10 @@ export function isImageTool(name: string): boolean {
 
 function DefaultNavLink({ href, className, children }: { href: string; className: string; children: React.ReactNode }) {
   return <a href={href} className={className}>{children}</a>;
+}
+
+function defaultRenderGenerating(s: { startedAt?: number; still: boolean; label?: React.ReactNode }) {
+  return <ImageGenPlaceholder startedAt={s.startedAt} still={s.still} label={s.label} />;
 }
 
 const DEFAULT_RATIO = 4 / 3;
@@ -46,7 +51,7 @@ export function ToolMedia({
 }: {
   part: ToolPart;
   imageOpts?: ImageAllowOpts;
-  /** The app's placeholder tile while the image draws. Gets a neutral pulsing box by default. */
+  /** The app's placeholder tile while the image draws. Defaults to the dot-matrix ImageGenPlaceholder. */
   renderGenerating?: (state: { startedAt?: number; still: boolean; label?: React.ReactNode }) => React.ReactNode;
   /** Where "still rendering" points (a gallery). No link when absent. */
   openHref?: string;
@@ -106,14 +111,11 @@ export function ToolMedia({
         <div
           className={`absolute inset-0 motion-safe:transition-opacity motion-safe:duration-300 ${loaded ? 'opacity-0' : 'opacity-100'}`}
         >
-          {renderGenerating ? (
-            renderGenerating({ startedAt: part.startedAt, still: failed || (!running && !(media && sawRunning)), label })
-          ) : (
-            <div className="relative h-full w-full">
-              <div className="h-full w-full animate-pulse bg-muted" />
-              {label && <div className="absolute inset-0 flex items-center justify-center p-2 text-center text-xs text-muted-foreground">{label}</div>}
-            </div>
-          )}
+          {(renderGenerating ?? defaultRenderGenerating)({
+            startedAt: part.startedAt,
+            still: failed || (!running && !(media && sawRunning)),
+            label,
+          })}
         </div>
       )}
       {media && !failed && (

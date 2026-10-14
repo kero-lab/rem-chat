@@ -5,9 +5,11 @@ import type { ToolPart } from '../../src/protocol/parts';
 
 describe('ToolMedia (#2091)', () => {
   const running: ToolPart = { type: 'tool-generate_image', toolCallId: 'g', state: 'input-available', startedAt: Date.now() - 14_000 };
-  it('shows a neutral pulsing placeholder while running', () => {
-    const { container } = render(<ToolMedia part={running} />);
-    expect(container.querySelector('.animate-pulse')).not.toBeNull();
+  it('shows the dot-matrix placeholder with a Drawing timer by default while running', () => {
+    const { container, getByText } = render(<ToolMedia part={running} />);
+    expect(container.querySelector('[data-slot="image-placeholder"] canvas')).not.toBeNull();
+    expect(getByText(/Drawing… 0:1\d/)).toBeTruthy();
+    expect(container.querySelector('.animate-pulse')).toBeNull();
   });
   it('lets the app supply the placeholder', () => {
     const { getByTestId } = render(<ToolMedia part={running} renderGenerating={() => <div data-testid="mine" />} />);
@@ -34,8 +36,7 @@ describe('ToolMedia (#2091)', () => {
   });
   it('the default placeholder fills its tile', () => {
     const { container } = render(<ToolMedia part={running} />);
-    expect(container.querySelector('.animate-pulse')!.className).toContain('h-full');
-    expect(container.querySelector('.animate-pulse')!.className).not.toContain('w-48');
+    expect(container.querySelector('[data-slot="image-placeholder"]')!.className).toContain('inset-0');
   });
   it('honours imageOpts for auto-loading', () => {
     const done = { ...running, state: 'output-available', media: [{ type: 'file', url: 'https://img.example/a.png', mediaType: 'image/png', name: 'x' }] } as ToolPart;

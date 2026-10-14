@@ -9,6 +9,19 @@ export { ChatTip, ChatTipContext, TipProvider, type TipComponent } from './chat-
 export { ToolChip } from './tool-chip';
 export { ToolCallDetails } from './tool-call-details';
 export { ToolMedia, isImageTool } from './tool-media';
+export {
+  ImageGenPlaceholder,
+  DEFAULT_STYLE as IMAGE_PLACEHOLDER_STYLE,
+  blobRadius,
+  drawFrame,
+  fieldAt,
+  litAt,
+  sphereCentres,
+  type PlaceholderStyle,
+  type DotColours,
+  type Sphere,
+  type Band,
+} from './image-gen-placeholder';
 export { ChatScroll, useChatScroll } from './chat-scroll';
 export { RemMark } from './rem-mark';
 export { CitationMark, CitationLink } from './citation';
