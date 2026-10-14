@@ -6,7 +6,7 @@ export { PartView, PartBoundary, RENDERERS, type PartRenderer, type PartCtx } fr
 export { UnsupportedPart } from './unsupported-part';
 export { ImagePart, type ImageAllowOpts } from './image-part';
 export { ChatTip, ChatTipContext, TipProvider, type TipComponent } from './chat-tip';
-export { ToolChip } from './tool-chip';
+export { ToolChip, chipStatusOf, type ChipStatus } from './tool-chip';
 export { ToolCallDetails } from './tool-call-details';
 export { ToolMedia, isImageTool } from './tool-media';
 export {
@@ -25,6 +25,7 @@ export {
 export { ChatScroll, useChatScroll } from './chat-scroll';
 export { RemMark } from './rem-mark';
 export { CitationMark, CitationLink } from './citation';
+export { DiscordEmote, DiscordTime, DiscordMention, DiscordChannel, DiscordRole, DiscordSpoiler, DISCORD_TOKEN_COMPONENTS } from './discord-token-view';
 export { remarkDiscordTokens, DISCORD_ALLOWED_TAGS, hidePartialDiscordToken, emoteUrl } from './remark/discord-tokens';
 export { remarkEmoji, pickKaomoji, hashSeed } from './remark/emoji';
 export { remarkChipParens } from './remark/chip-parens';

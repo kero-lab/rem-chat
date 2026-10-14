@@ -19,6 +19,12 @@ describe('RemMark (#2091 D11)', () => {
     rerender(<RemMark state="streaming" icon={icon} />);
     expect(container.querySelector('[data-slot="rem-mark-ring"]')!.className).not.toContain('animate-');
   });
+  it('the ring stays Rem blue on error; the alert row carries the error (rem-chat#1)', () => {
+    const { container } = render(<RemMark state="error" icon={icon} />);
+    const ring = container.querySelector('[data-slot="rem-mark-ring"]')!;
+    expect(ring.className).toContain('border-rem');
+    expect(ring.className).not.toContain('destructive');
+  });
   it('uses no image/emote asset', () => {
     const { container } = render(<RemMark state="idle" icon={icon} />);
     expect(container.querySelector('img')).toBeNull();

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ChatTip, ChatTipContext } from '../../src/render/chat-tip';
-import { ToolChip } from '../../src/render/tool-chip';
+import { ToolChip, chipStatusOf } from '../../src/render/tool-chip';
 import { ToolCallDetails } from '../../src/render/tool-call-details';
 import type { ToolPart } from '../../src/protocol/parts';
 
@@ -43,6 +43,29 @@ describe('ToolChip', () => {
     expect(b.textContent).toContain('3s');
     b.click();
     expect(toggled).toBe(1);
+  });
+  it('a stopped call reads as stopped, not failed (rem-chat#1)', () => {
+    render(<ToolChip part={{ ...part, state: 'output-error', outcome: 'cancelled' }} open={false} onToggle={() => {}} />);
+    const b = screen.getByRole('button');
+    expect(b.getAttribute('data-status')).toBe('stopped');
+    expect(b.getAttribute('aria-label')).toContain('stopped');
+    expect(b.className).not.toContain('red-');
+  });
+  it.each(['error', 'timeout', 'refused', 'withheld', 'rate_limited', 'daily_cap'] as const)('outcome %s reads as failed', (outcome) => {
+    expect(chipStatusOf({ ...part, state: 'output-error', outcome })).toBe('failed');
+  });
+  it('a real error still reads as failed', () => {
+    render(<ToolChip part={{ ...part, state: 'output-error', outcome: 'error' }} open={false} onToggle={() => {}} />);
+    const b = screen.getByRole('button');
+    expect(b.getAttribute('data-status')).toBe('failed');
+    expect(b.className).toContain('red-');
+  });
+  it('tooltip prose styles the name as code and colours the status word', () => {
+    render(<ToolChip part={part} open={false} onToggle={() => {}} />);
+    const tip = screen.getByRole('tooltip', { hidden: true });
+    expect(tip.querySelector('code')?.textContent).toBe('web_search');
+    expect(tip.querySelector('.tabular-nums')?.textContent).toBe('3s');
+    expect(tip.querySelector('.text-green-700')?.textContent).toBe('done');
   });
 });
 
