@@ -17,7 +17,7 @@ export function chipStatusOf(part: ToolPart): ChipStatus {
 
 const STATUS_TEXT: Record<ChipStatus, string> = {
   running: 'text-muted-foreground',
-  done: 'text-green-600 dark:text-green-400',
+  done: 'text-green-700 dark:text-green-400',
   stopped: 'text-muted-foreground',
   failed: 'text-red-600 dark:text-red-400',
 };
@@ -34,7 +34,7 @@ function Duration({ ms }: { ms: number }) {
   return (
     <span className="tabular-nums">
       {formatDurationMs(ms).split(/(\d+)/).filter(Boolean).map((s, i) =>
-        /^\d+$/.test(s) ? <span key={i} className="font-medium">{s}</span> : <span key={i} className="opacity-60">{s}</span>,
+        /^\d+$/.test(s) ? <span key={i} className="font-medium">{s}</span> : <span key={i} className="opacity-75">{s}</span>,
       )}
     </span>
   );

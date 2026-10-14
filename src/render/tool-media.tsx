@@ -76,7 +76,7 @@ export function ToolMedia({
     return () => clearTimeout(id);
   }, [loaded, reduced]);
 
-  if (part.state === 'output-error') return null; // the chip already says it failed
+  if (part.state === 'output-error') return null; // the chip already says it failed or was stopped
   if (!image && !media) return null;
   if (media && !media.mediaType.startsWith('image/')) return null;
   // Off-allowlist media keeps ImagePart's click-to-load guard, outside the tile.
