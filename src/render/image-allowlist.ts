@@ -29,7 +29,9 @@ export function isAllowedChatImage(src: string | undefined, opts: ImageAllowlist
   if (url.protocol !== 'https:') return false;
   if (opts.origin && url.origin === opts.origin) return true;
   const host = url.hostname;
+  // 'rem.home' must not match 'evil-rem.home': force the label boundary.
+  const suffixes = (opts.extraSuffixes ?? []).map((s) => (s.startsWith('.') ? s : `.${s}`));
   return DEFAULT_IMAGE_HOSTS.includes(host)
     || (opts.extraHosts ?? []).includes(host)
-    || (opts.extraSuffixes ?? []).some((s) => host.endsWith(s));
+    || suffixes.some((s) => host.endsWith(s));
 }

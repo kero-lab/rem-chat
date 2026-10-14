@@ -1,4 +1,4 @@
-// tests/chat-turns.test.ts
+// tests/turns.test.ts
 import { describe, it, expect } from 'vitest';
 import {
   IDLE_RESET_MS, toRuns, isEmoteOnly, trimReply, shouldIdleReset, remMarkState, headerMarkState, providerAccent, toPlainText,

@@ -14,6 +14,16 @@ describe('isAllowedChatImage', () => {
     expect(isAllowedChatImage('https://img.example/a.png', { extraHosts: ['img.example'] })).toBe(true);
     expect(isAllowedChatImage('https://rem.home.evil.example/x.png', { extraSuffixes: ['.rem.home'] })).toBe(false);
   });
+  it('bare suffixes get a label boundary', () => {
+    expect(isAllowedChatImage('https://evil-rem.home/x', { extraSuffixes: ['rem.home'] })).toBe(false);
+    expect(isAllowedChatImage('https://x.rem.home/x', { extraSuffixes: ['rem.home'] })).toBe(true);
+  });
+  it('edge URL forms', () => {
+    expect(isAllowedChatImage('blob:https://cdn.discordapp.com/x')).toBe(false);
+    expect(isAllowedChatImage('https://cdn.discordapp.com@evil.net/x')).toBe(false);
+    expect(isAllowedChatImage('https://CDN.DiscordApp.com/x')).toBe(true);
+    expect(isAllowedChatImage('https://cdn.discordapp.com:8443/x')).toBe(true);
+  });
   it('same-origin relative URLs are allowed', () => {
     expect(isAllowedChatImage('/api/img/1.png')).toBe(true);
     expect(isAllowedChatImage('/api/img/1.png', { origin: 'https://hub.example' })).toBe(true);
