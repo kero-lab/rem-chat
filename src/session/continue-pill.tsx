@@ -21,7 +21,7 @@ export function ContinuePill({ onContinue, lastActivityAt }: { onContinue: () =>
       data-slot="continue-pill"
       aria-label="Continue previous chat"
       onClick={onContinue}
-      className="inline-flex max-w-full cursor-pointer items-center gap-1.5 rounded-full border border-rem/40 bg-rem-faint px-3 py-1 text-xs text-rem hover:border-rem disabled:cursor-default disabled:opacity-50"
+      className="inline-flex max-w-full cursor-pointer items-center gap-1.5 rounded-full border border-rem/40 bg-rem-faint px-3 py-1 text-xs text-rem hover:border-rem"
     >
       <CornerUpLeft className="h-3.5 w-3.5 shrink-0" aria-hidden />
       <span className="shrink-0">Continue</span>

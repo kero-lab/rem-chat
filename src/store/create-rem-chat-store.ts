@@ -53,7 +53,8 @@ export function createRemChatStore(opts: { transport: RemChatTransport; sessionS
         const res = await opts.transport({ content, sessionId: get().sessionId }, ac.signal);
         if (!res.ok || !res.body) {
           const err = await res.json().catch(() => ({} as { error?: string }));
-          patch(assistantId, (m) => ({ ...m, isLoading: false, error: err.error || `HTTP ${res.status}` }));
+          if (ac.signal.aborted) patch(assistantId, (m) => ({ ...m, isLoading: false, stopped: true }));
+          else patch(assistantId, (m) => ({ ...m, isLoading: false, error: err.error || `HTTP ${res.status}` }));
           return;
         }
         for await (const ev of parseRemChatStream(res.body)) {
@@ -66,8 +67,11 @@ export function createRemChatStore(opts: { transport: RemChatTransport; sessionS
         if (isAbort(e) || ac.signal.aborted) patch(assistantId, (m) => ({ ...closeOpenTools(m), isLoading: false, stopped: true }));
         else patch(assistantId, (m) => ({ ...closeOpenTools(m), isLoading: false, error: e instanceof Error ? e.message : String(e) }));
       } finally {
-        if (controller === ac) controller = null;
-        set({ isLoading: false, lastActivityAt: Date.now() });
+        // Only the current run may touch store-level state; a run orphaned by reset() must not clear the new run's isLoading.
+        if (controller === ac) {
+          controller = null;
+          set({ isLoading: false, lastActivityAt: Date.now() });
+        }
       }
     };
 
@@ -94,12 +98,15 @@ export function createRemChatStore(opts: { transport: RemChatTransport; sessionS
       },
       reset() {
         controller?.abort();
+        controller = null;
         set({ messages: [], sessionId: newId(), isLoading: false, lastActivityAt: null });
       },
     };
   });
 
-  store.subscribe((s) => {
+  // Persist on structural changes only, not every stream delta; isLoading flipping at stream end covers the final text.
+  store.subscribe((s, prev) => {
+    if (s.isLoading === prev.isLoading && s.messages.length === prev.messages.length && s.sessionId === prev.sessionId && s.lastActivityAt === prev.lastActivityAt) return;
     try {
       localStorage.setItem(opts.sessionStorageKey, JSON.stringify({ sessionId: s.sessionId, messages: s.messages.map(settle), lastActivityAt: s.lastActivityAt }));
     } catch { /* quota or private mode: the chat still works in memory */ }

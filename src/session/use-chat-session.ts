@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useStore, type StoreApi } from 'zustand';
 import { IDLE_RESET_MS, shouldIdleReset } from '../turns';
 import type { RemChatState } from '../store/create-rem-chat-store';
@@ -16,7 +16,7 @@ export function useChatSession(
   const idleResetMs = opts.idleResetMs ?? IDLE_RESET_MS;
   // Read through a ref so an inline `now` lambda does not re-run the mount check on every render.
   const nowRef = useRef(opts.now);
-  nowRef.current = opts.now;
+  useLayoutEffect(() => { nowRef.current = opts.now; });
 
   const check = useCallback(() => {
     const s = store.getState();
@@ -40,6 +40,8 @@ export function useChatSession(
   const continueChat = useCallback(() => {
     const snap = snapshot.current;
     if (!snap) return;
+    const cur = store.getState();
+    if (cur.isLoading || cur.messages.length > 0) return;
     // Resuming is activity: keeping the old timestamp would idle-reset the restored chat on the next focus.
     store.setState({ ...snap, lastActivityAt: nowRef.current ? nowRef.current() : Date.now() });
     snapshot.current = null;

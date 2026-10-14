@@ -89,4 +89,56 @@ describe('createRemChatStore', () => {
     release();
     await p;
   });
+
+  it('a stale run cannot clear isLoading or the controller of the new session', async () => {
+    const aborts: boolean[] = [];
+    const resolvers: Array<(r: Response) => void> = [];
+    const transport = vi.fn<RemChatTransport>((_b, signal) => new Promise<Response>((res) => {
+      aborts.push(false);
+      const i = aborts.length - 1;
+      signal.addEventListener('abort', () => { aborts[i] = true; });
+      resolvers.push(res); // ignores the signal: only resolves when told to
+    }));
+    const s = createRemChatStore({ transport, sessionStorageKey: 'k' });
+    const p1 = s.getState().send('old');
+    s.getState().reset();
+    const p2 = s.getState().send('new');
+    expect(s.getState().isLoading).toBe(true);
+    resolvers[0](sse('event: done\ndata: {"debug":{}}\n\n'));
+    await p1;
+    expect(s.getState().isLoading).toBe(true);
+    expect(s.getState().messages).toHaveLength(2);
+    s.getState().stop();
+    expect(aborts[1]).toBe(true);
+    resolvers[1](sse('event: done\ndata: {"debug":{}}\n\n'));
+    await p2;
+  });
+  it('a throwing localStorage.setItem does not break send', async () => {
+    const transport = vi.fn<RemChatTransport>(async () => sse('event: text\ndata: {"delta":"Hi"}\n\n', 'event: done\ndata: {"debug":{}}\n\n'));
+    const s = createRemChatStore({ transport, sessionStorageKey: 'k' });
+    const spy = vi.spyOn(localStorage, 'setItem').mockImplementation(() => { throw new Error('quota'); });
+    await s.getState().send('hello');
+    spy.mockRestore();
+    expect(s.getState().messages[1]).toMatchObject({ content: 'Hi', isLoading: false });
+  });
+  it('does not rewrite storage on every delta', async () => {
+    const frames = Array.from({ length: 50 }, (_, i) => `event: text\ndata: {"delta":"${i}"}\n\n`);
+    const transport = vi.fn<RemChatTransport>(async () => sse(...frames, 'event: done\ndata: {"debug":{}}\n\n'));
+    const s = createRemChatStore({ transport, sessionStorageKey: 'k' });
+    const spy = vi.spyOn(localStorage, 'setItem');
+    await s.getState().send('hello');
+    const calls = spy.mock.calls.length;
+    spy.mockRestore();
+    expect(calls).toBeLessThan(10);
+    expect(JSON.parse(localStorage.getItem('k')!).messages[1].content).toContain('49');
+  });
+  it('an aborted non-OK response is stopped, not an HTTP error', async () => {
+    const transport = vi.fn<RemChatTransport>(async () => new Response('{}', { status: 502 }));
+    const s = createRemChatStore({ transport, sessionStorageKey: 'k' });
+    const p = s.getState().send('hi');
+    s.getState().stop();
+    await p;
+    expect(s.getState().messages[1]).toMatchObject({ stopped: true, isLoading: false });
+    expect(s.getState().messages[1].error).toBeUndefined();
+  });
 });

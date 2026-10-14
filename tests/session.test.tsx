@@ -34,6 +34,17 @@ describe('useChatSession', () => {
     act(() => result.current.continueChat());
     expect(store.getState().messages).toEqual([]);
   });
+  it('continueChat is a no-op while loading or when the current chat has messages', () => {
+    const store = seeded(T0);
+    const { result } = renderHook(() => useChatSession(store, { now: () => T0 + IDLE_RESET_MS + 1 }));
+    act(() => { store.setState({ isLoading: true }); });
+    act(() => result.current.continueChat());
+    expect(store.getState().sessionId).not.toBe('s1');
+    act(() => { store.setState({ isLoading: false, messages: [{ id: 'n', role: 'user', content: 'y', timestamp: new Date() }] }); });
+    act(() => result.current.continueChat());
+    expect(store.getState().messages.map((m) => m.id)).toEqual(['n']);
+    expect(store.getState().sessionId).not.toBe('s1');
+  });
   it('does not reset within the idle window', () => {
     const store = seeded(T0);
     const { result } = renderHook(() => useChatSession(store, { now: () => T0 + IDLE_RESET_MS - 1000 }));
