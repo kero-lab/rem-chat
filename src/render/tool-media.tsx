@@ -63,6 +63,7 @@ export function ToolMedia({
   const [placeholderGone, setPlaceholderGone] = React.useState(false);
   const [natural, setNatural] = React.useState<number | null>(null);
   const reduced = useReducedMotion();
+  const NavLink = renderNavLink ?? DefaultNavLink;
 
   React.useEffect(() => {
     if (!loaded) return;
@@ -87,7 +88,7 @@ export function ToolMedia({
       {openHref ? (
         <>
           Still rendering — it&apos;ll be in the{' '}
-          {(renderNavLink ?? DefaultNavLink)({ href: openHref, className: 'text-rem underline-offset-2 hover:underline', children: 'gallery' })}
+          <NavLink href={openHref} className="text-rem underline-offset-2 hover:underline">gallery</NavLink>
         </>
       ) : (
         'Still rendering'

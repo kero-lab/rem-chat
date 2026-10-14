@@ -30,7 +30,7 @@ export interface ChatMarkdownProps {
   density?: Density;
   /** The web_search results this text's [n] markers cite (#2091 R4). */
   sources?: SourceRef[];
-  /** App plugins, appended after the built-in ones (e.g. RemHub's issue refs). */
+  /** App plugins, run after the Discord tokens but before chip-parens, so it sees the links they make (e.g. RemHub's issue refs). */
   remarkPlugins?: PluginList;
   /** Render Discord tokens (<:emote:id>, <@id>, <t:ts>, ||spoiler||). Off by default. */
   discordTokens?: boolean;

@@ -18,10 +18,12 @@ export const TipProvider = ChatTipContext.Provider;
 export function ChatTip({ label, shortcut, children }: { label: React.ReactNode; shortcut?: string; children: React.ReactElement }) {
   const Provided = React.useContext(ChatTipContext);
   const id = React.useId();
-  if (Provided) return <>{Provided({ label, shortcut, children })}</>;
+  if (Provided) return <Provided label={label} shortcut={shortcut}>{children}</Provided>;
+  const own = children.props as { className?: string; 'aria-describedby'?: string };
   const child = React.cloneElement(children as React.ReactElement<{ className?: string; 'aria-describedby'?: string }>, {
-    className: cn('peer', (children.props as { className?: string }).className),
-    'aria-describedby': id,
+    className: cn('peer', own.className),
+    // Keep a description the child already carries; the bubble adds to it.
+    'aria-describedby': own['aria-describedby'] ? `${own['aria-describedby']} ${id}` : id,
   });
   return (
     <>

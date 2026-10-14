@@ -24,6 +24,15 @@ describe('ChatTip', () => {
   });
 });
 
+describe('ChatTip describedby', () => {
+  it('keeps a description the child already has', () => {
+    render(<ChatTip label="Send"><button aria-describedby="hint">go</button></ChatTip>);
+    const ids = screen.getByRole('button').getAttribute('aria-describedby')!.split(' ');
+    expect(ids[0]).toBe('hint');
+    expect(ids).toHaveLength(2);
+  });
+});
+
 describe('ToolChip', () => {
   const part: ToolPart = { type: 'tool-web_search', toolCallId: 't', state: 'output-available', durationMs: 2500 };
   it('names the tool and duration, and toggles', () => {
