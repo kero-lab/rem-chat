@@ -5,8 +5,8 @@
     "jsx": "react-jsx",
     "moduleResolution": "bundler",
     "module": "ESNext",
-    "target": "ES2022",
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "target": "ES2023",
+    "lib": ["DOM", "DOM.Iterable", "ES2023"],
     "skipLibCheck": true,
     "isolatedModules": true,
     "types": ["vitest/globals", "@testing-library/jest-dom"]
